@@ -32,7 +32,7 @@ class Signup extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "welcome to TAFGenius",
+                        "TAFGenius",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
@@ -43,12 +43,12 @@ class Signup extends StatelessWidget {
                       const SizedBox(height: 20),
                       TextFormField(
                         decoration: const InputDecoration(
-                          labelText: 'Nom complet',
+                          labelText: 'User name',
                           prefixIcon: Icon(Icons.person),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre nom';
+                            return 'Please enter your name';
                           }
                           return null;
                         },
@@ -62,10 +62,10 @@ class Signup extends StatelessWidget {
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre email';
+                            return 'Please enter your email';
                           }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Email invalide';
+                            return 'Invalid email';
                           }
                           return null;
                         },
@@ -73,13 +73,13 @@ class Signup extends StatelessWidget {
                       const SizedBox(height: 16),
                       TextFormField(
                         decoration: const InputDecoration(
-                          labelText: 'Mot de passe',
+                          labelText: 'Passsword',
                           prefixIcon: Icon(Icons.lock),
                         ),
                         obscureText: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un mot de passe';
+                            return 'Please enter your password';
                           }
                           if (value.length < 6) {
                             return 'Minimum 6 caractères';
@@ -90,14 +90,14 @@ class Signup extends StatelessWidget {
                       const SizedBox(height: 16),
                       TextFormField(
                         decoration: const InputDecoration(
-                          labelText: 'Confirmer le mot de passe',
+                          labelText: 'Confirm your password',
                           prefixIcon: Icon(Icons.lock_outline),
                         ),
                         obscureText: true,
                         validator: (value) {
                           // Tu peux ajouter une vérification pour correspondre au mot de passe
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez confirmer le mot de passe';
+                            return 'Please confirm the password';
                           }
                           return null;
                         },
@@ -116,12 +116,12 @@ class Signup extends StatelessWidget {
                             if (_formKey.currentState!.validate()) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Inscription réussie !')),
+                                    content: Text('SuccessfulRegistration !')),
                               );
                             }
                           },
                           child: const Text(
-                            'S’inscrire',
+                            'register',
                             style: TextStyle(fontSize: 18),
                           ),
                         ),
@@ -132,7 +132,7 @@ class Signup extends StatelessWidget {
                           // navigation vers page de connexion
                         },
                         child: const Text(
-                          "Vous avez déjà un compte ? Connectez-vous",
+                          "Already have an account? Log in",
                         ),
                       )
                     ],

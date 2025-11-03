@@ -48,10 +48,10 @@ class Login extends StatelessWidget {
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre email';
+                            return 'Please enter your email';
                           }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Email invalide';
+                            return 'Invalid email';
                           }
                           return null;
                         },
@@ -59,13 +59,13 @@ class Login extends StatelessWidget {
                       const SizedBox(height: 16),
                       TextFormField(
                         decoration: const InputDecoration(
-                          labelText: 'Mot de passe',
+                          labelText: 'password',
                           prefixIcon: Icon(Icons.lock),
                         ),
                         obscureText: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre mot de passe';
+                            return 'Please enter your password';
                           }
                           return null;
                         },
@@ -84,12 +84,12 @@ class Login extends StatelessWidget {
                             if (_formKey.currentState!.validate()) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Connexion réussie !')),
+                                    content: Text('Login successful!')),
                               );
                             }
                           },
                           child: const Text(
-                            'Se connecter',
+                            'Log in',
                             style: TextStyle(fontSize: 18),
                           ),
                         ),
@@ -101,7 +101,7 @@ class Login extends StatelessWidget {
                           Navigator.pushNamed(context, '/signup');
                         },
                         child: const Text(
-                          "Pas encore de compte ? Inscrivez-vous",
+                          "Don't have an account yet? Sign up",
                         ),
                       ),
                     ],
