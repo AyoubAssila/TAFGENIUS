@@ -1,0 +1,10 @@
+    export { LandingPage } from './LandingPage';
+    export { DashboardView } from './DashboardView';
+    export { Sidebar } from './Sidebar';
+    export { Header } from './Header';
+    export { DashboardContent } from './DashboardContent';
+    export { CoursesView } from './CoursesView';
+    export { MessagingView } from './MessagingView';
+    export { LiveSessionsView } from './LiveSessionsView';
+    export { AnalyticsView } from './AnalyticsView';
+    export { SettingsView } from './SettingsView';
