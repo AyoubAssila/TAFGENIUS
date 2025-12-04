@@ -1,0 +1,13 @@
+# Node / React
+node_modules/
+TAFGENIUSWeb/node_modules/
+TAFGENIUSWeb/.cache/
+**/.cache/
+
+# Flutter build
+TAFGENIUSMobile/build/
+TAFGENIUSMobile/.dart_tool/
+TAFGENIUSMobile/.flutter-plugins
+TAFGENIUSMobile/.flutter-plugins-dependencies
+TAFGENIUSMobile/.pub-cache/
+TAFGENIUSMobile/.packages
