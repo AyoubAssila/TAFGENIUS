@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "262265089602",
+    "project_id": "tafgenius",
+    "storage_bucket": "tafgenius.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262265089602:android:5082fcca710a6bece7c7db",
+        "android_client_info": {
+          "package_name": "com.example.tafgeniusmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_HWh8_FdCx0yhEd14nr_EzwHo55PcC48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262265089602:android:9cf09130bb43422ce7c7db",
+        "android_client_info": {
+          "package_name": "com.tafgeniusmobile.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_HWh8_FdCx0yhEd14nr_EzwHo55PcC48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

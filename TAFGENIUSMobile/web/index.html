@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- Google Sign-In Meta Tag - REMPLACEZ PAR VOTRE VRAI CLIENT ID -->
+  <!-- REMPLACEZ PAR VOTRE VRAI CLIENT ID -->
+  <meta name="google-signin-client_id" content="123456789-abc123def456.apps.googleusercontent.com">
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="tafgeniusmobile">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>tafgeniusmobile</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Viewport important pour le responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<!-- Scripts Firebase DOIVENT être dans le body -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<!-- Google Platform Library - ESSENTIEL -->
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+<!-- Configuration Firebase -->
+<script>
+  // Remplacez par votre configuration Firebase
+  const firebaseConfig = {
+    apiKey: "votre-api-key",
+    authDomain: "votre-projet.firebaseapp.com",
+    projectId: "votre-projet-id",
+    storageBucket: "votre-projet.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "votre-app-id"
+  };
+
+  // Initialiser Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
