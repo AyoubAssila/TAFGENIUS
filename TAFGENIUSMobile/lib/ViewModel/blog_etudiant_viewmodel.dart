@@ -10,9 +10,7 @@ class BlogEtudiantViewModel extends ChangeNotifier {
   final FirebaseAuthService _authService = FirebaseAuthService();
 
   List<PostModel> _posts = [];
-  List<PostModel> get posts => _posts.where((p) =>
-  p.category != PostCategory.Articles && p.category != PostCategory.Experiences
-  ).toList();
+  List<PostModel> get posts => _posts;
 
   bool _loading = false;
   bool get loading => _loading;
@@ -23,156 +21,226 @@ class BlogEtudiantViewModel extends ChangeNotifier {
   String? _currentUserId;
   String? _currentUserName;
 
-  // Initialiser
+  bool get isVisitor => _currentUserId == null;
+
+  //---------------------------------------------------------
+  //   INITIALISATION
+  //---------------------------------------------------------
   Future<void> initialize() async {
     _loading = true;
     notifyListeners();
 
-    try {
-      final user = _authService.currentUser;
-      if (user != null) {
-        _currentUserId = user.uid;
-        _currentUserName = user.displayName ?? 'Étudiant';
-      }
+    final user = _authService.currentUser;
 
-      await _loadPosts();
-    } catch (e) {
-      _errorMessage = 'Erreur de chargement: $e';
+    if (user != null) {
+      _currentUserId = user.uid;
+      _currentUserName = user.displayName ?? "Student";
     }
+
+    await _loadPublicPosts();
+    await _loadUserPosts(); // ← Charge automatiquement les posts de l’étudiant
 
     _loading = false;
     notifyListeners();
   }
 
-  // Charger les posts
-  Future<void> _loadPosts() async {
+  //---------------------------------------------------------
+  //   CHARGER LES POSTS PUBLICS
+  //---------------------------------------------------------
+  Future<void> _loadPublicPosts() async {
     try {
       final snapshot = await _firestore
-          .collection('blogPosts')
-          .where('category', whereIn: ['Opinions', 'Experiences'])
-          .orderBy('createdAt', descending: true)
+          .collection("blogPosts")
+          .where("category", whereIn: ["Experiences", "Articles", "Motivation"])
+          .where("status", isEqualTo: "published")
           .get();
 
-      _posts = snapshot.docs.map((doc) {
-        return PostModel.fromMap(doc.data(), doc.id);
-      }).toList();
+      final publicPosts = snapshot.docs
+          .map((doc) => PostModel.fromMap(doc.data(), doc.id))
+          .toList();
 
-      notifyListeners();
+      _posts.addAll(publicPosts);
     } catch (e) {
-      print('Erreur chargement posts: $e');
+      _errorMessage = "Error loading public posts: $e";
     }
   }
 
-  // Ajouter un post (seulement Opinions)
-  Future<void> addPost({
-    required String text,
-    List<AttachmentModel> attachments = const [],
-  }) async {
-    if (_currentUserId == null || _currentUserName == null) {
-      _errorMessage = 'Non connecté';
+  //---------------------------------------------------------
+  //   CHARGER LES POSTS PERSONNELS (MÊME APRÈS DECONNEXION)
+  //---------------------------------------------------------
+  Future<void> _loadUserPosts() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final snapshot = await _firestore
+          .collection("blogPosts")
+          .where("userId", isEqualTo: _currentUserId)
+          .get();
+
+      final userPosts = snapshot.docs
+          .map((doc) => PostModel.fromMap(doc.data(), doc.id))
+          .toList();
+
+      _posts.addAll(userPosts);
+
+      // Tri chronologique
+      _posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
       notifyListeners();
+    } catch (e) {
+      _errorMessage = "Error loading user posts: $e";
+    }
+  }
+
+  //---------------------------------------------------------
+  //   AJOUTER UN POST
+  //---------------------------------------------------------
+  Future<void> addPost(
+      BuildContext context, {
+        required String text,
+        List<AttachmentModel> attachments = const [],
+      }) async {
+    if (isVisitor) {
+      showSignupDialog(context, "post");
       return;
     }
 
     try {
+      final postId = DateTime.now().millisecondsSinceEpoch.toString();
+
       final newPost = PostModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: postId,
         authorName: _currentUserName!,
-        authorRole: 'student',
+        authorRole: "student",
         createdAt: DateTime.now(),
         text: text,
         attachments: attachments,
-        category: PostCategory.Opinions, // Étudiants ne peuvent que opinions
+        category: PostCategory.Motivation,
         likes: 0,
+        comments: [],
       );
 
-      // Sauvegarder dans Firestore
-      await _firestore.collection('blogPosts').doc(newPost.id).set({
+      await _firestore.collection("blogPosts").doc(postId).set({
         ...newPost.toMap(),
-        'userId': _currentUserId,
+        "userId": _currentUserId,
+        "status": "published",
       });
 
-      // Ajouter localement
       _posts.insert(0, newPost);
       notifyListeners();
-
     } catch (e) {
-      _errorMessage = 'Erreur: $e';
+      _errorMessage = "Error adding post: $e";
       notifyListeners();
     }
   }
 
-  // Ajouter un commentaire
-  Future<void> addComment(String postId, String text) async {
-    if (_currentUserName == null) return;
-
-    try {
-      final newComment = CommentModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        authorName: _currentUserName!,
-        authorRole: 'student',
-        content: text,
-        createdAt: DateTime.now(),
-      );
-
-      // Ajouter à la sous-collection comments
-      await _firestore
-          .collection('blogPosts')
-          .doc(postId)
-          .collection('comments')
-          .doc(newComment.id)
-          .set(newComment.toMap());
-
-      // Recharger les posts pour avoir les commentaires
-      await _loadPosts();
-
-    } catch (e) {
-      print('Erreur commentaire: $e');
+  //---------------------------------------------------------
+  //   LIKE POST
+  //---------------------------------------------------------
+  Future<void> likePost(BuildContext context, String postId) async {
+    if (isVisitor) {
+      showSignupDialog(context, "like");
+      return;
     }
-  }
 
-  // Liker un post
-  Future<void> likePost(String postId) async {
     try {
       final index = _posts.indexWhere((p) => p.id == postId);
       if (index == -1) return;
 
       _posts[index].likes++;
 
-      await _firestore.collection('blogPosts').doc(postId).update({
-        'likes': _posts[index].likes,
+      await _firestore.collection("blogPosts").doc(postId).update({
+        "likes": _posts[index].likes,
       });
 
       notifyListeners();
     } catch (e) {
-      print('Erreur like: $e');
+      print("Error liking post: $e");
     }
   }
 
-  // Supprimer un post (seulement si auteur)
+  //---------------------------------------------------------
+  //   ADD COMMENT
+  //---------------------------------------------------------
+  Future<void> addComment(
+      BuildContext context, String postId, String text) async {
+    if (isVisitor) {
+      showSignupDialog(context, "comment");
+      return;
+    }
+
+    try {
+      final index = _posts.indexWhere((p) => p.id == postId);
+      if (index == -1) return;
+
+      final newComment = CommentModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        authorName: _currentUserName!,
+        authorRole: "student",
+        content: text,
+        createdAt: DateTime.now(),
+      );
+
+      _posts[index].comments.add(newComment);
+
+      await _firestore
+          .collection("blogPosts")
+          .doc(postId)
+          .collection("comments")
+          .doc(newComment.id)
+          .set(newComment.toMap());
+
+      notifyListeners();
+    } catch (e) {
+      print("Error adding comment: $e");
+    }
+  }
+
+  //---------------------------------------------------------
+  //   DELETE POST
+  //---------------------------------------------------------
   Future<void> deletePost(String postId) async {
     try {
       final post = _posts.firstWhere((p) => p.id == postId);
 
-      // Vérifier que c'est l'auteur
       if (post.authorName != _currentUserName) {
-        _errorMessage = 'Vous ne pouvez supprimer que vos posts';
+        _errorMessage = "You can only delete your own posts";
         notifyListeners();
         return;
       }
 
-      await _firestore.collection('blogPosts').doc(postId).delete();
+      await _firestore.collection("blogPosts").doc(postId).delete();
       _posts.removeWhere((p) => p.id == postId);
-
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Erreur suppression: $e';
+      _errorMessage = "Error deleting post: $e";
       notifyListeners();
     }
   }
-
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+  void showSignupDialog(BuildContext context, String action) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Sign up to $action"),
+        content: const Text(
+            "You need to sign up or login to perform this action."
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // TODO : redirection vers login/signup
+              // Navigator.pushNamed(context, "/login");
+            },
+            child: const Text("Sign Up / Login"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+        ],
+      ),
+    );
   }
+
 }

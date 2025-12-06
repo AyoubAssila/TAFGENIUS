@@ -100,8 +100,8 @@ class DashboardTab extends StatelessWidget {
                   else
                     ...viewModel.courses.take(3).map(
                           (course) => ListTile(
-                        leading: course.icon.isNotEmpty
-                            ? Text(course.icon, style: const TextStyle(fontSize: 28))
+                        leading: course.icons.isNotEmpty
+                            ? Text(course.icons, style: const TextStyle(fontSize: 28))
                             : const Icon(Icons.book, size: 28),
                         title: Text(course.title),
                         subtitle: Text(

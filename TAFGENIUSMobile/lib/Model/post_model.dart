@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'attachment_model.dart';
 import 'comment_model.dart';
 
-enum PostCategory { Opinions, Experiences, Articles }
+enum PostCategory { Experiences, Articles, Motivation }
 
 class PostModel {
   final String id;
   final String authorName;
-  final String authorRole;
+  final String authorRole; // student | content_webmaster | visitor
   final DateTime createdAt;
   String text;
   List<AttachmentModel> attachments;
@@ -23,7 +23,7 @@ class PostModel {
     required this.text,
     List<AttachmentModel>? attachments,
     List<CommentModel>? comments,
-    this.category = PostCategory.Opinions,
+    required this.category,
     this.likes = 0,
   })  : attachments = attachments ?? [],
         comments = comments ?? [];
@@ -45,7 +45,7 @@ class PostModel {
     return PostModel(
       id: id,
       authorName: map['authorName'] ?? '',
-      authorRole: map['authorRole'] ?? '',
+      authorRole: map['authorRole'] ?? 'visitor',
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       text: map['text'] ?? '',
       attachments: (map['attachments'] as List<dynamic>?)
@@ -57,8 +57,8 @@ class PostModel {
           .toList() ??
           [],
       category: PostCategory.values.firstWhere(
-              (e) => e.name == (map['category'] ?? 'Opinions'),
-          orElse: () => PostCategory.Opinions),
+              (e) => e.name == (map['category'] ?? 'Experiences'),
+          orElse: () => PostCategory.Experiences),
       likes: map['likes'] ?? 0,
     );
   }

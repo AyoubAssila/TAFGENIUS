@@ -66,8 +66,8 @@ class HistoryView extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
-            leading: c.icon.isNotEmpty
-                ? Image.asset(c.icon, width: 40, height: 40)
+            leading: c.icons.isNotEmpty
+                ? Image.asset(c.icons, width: 40, height: 40)
                 : const Icon(Icons.book),
             title: Text(c.title, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text("Progress: $progressPercent%"),

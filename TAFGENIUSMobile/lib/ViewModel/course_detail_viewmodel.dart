@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../Model/course_model.dart';
 import '../../Model/lesson_model.dart';
 import '../../Model/user_model.dart';
+import '../backend/firestore/services/user_service.dart';
 
 class CourseDetailViewModel extends ChangeNotifier {
   final CourseModel course;
@@ -12,16 +13,16 @@ class CourseDetailViewModel extends ChangeNotifier {
   double progressValue = 0;
 
   final _db = FirebaseFirestore.instance;
+  final UserService _userService = UserService(); // <-- Firestore progress
 
   CourseDetailViewModel({required this.course, this.user}) {
     loadLessons();
     computeProgress();
   }
 
-  /// Vérifie si l'utilisateur a acheté ce cours
   bool get hasAccess => user?.purchasedCourses.contains(course.id) ?? false;
 
-  /// Charge les leçons depuis Firestore
+  ///  charge les leçons du cours
   void loadLessons() {
     _db
         .collection("courses")
@@ -33,12 +34,13 @@ class CourseDetailViewModel extends ChangeNotifier {
       lessons = snapshot.docs
           .map((doc) => LessonModel.fromMap(doc.data(), doc.id))
           .toList();
-      computeProgress(); // recalculer le progrès
+
+      computeProgress();
       notifyListeners();
     });
   }
 
-  /// Calcule le progrès actuel de l'utilisateur pour ce cours
+  ///  calcule le progrès local
   void computeProgress() {
     if (!hasAccess || user == null) {
       progressValue = 0;
@@ -50,20 +52,19 @@ class CourseDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Getter pour récupérer les leçons complétées
   List<String> get completedLessons {
     if (!hasAccess || user == null) return [];
     return user!.progress[course.id]?.completedLessonIds ?? [];
   }
 
-  /// Marque une leçon comme complétée et met à jour le progrès
+  ///  Marquer une leçon comme accomplie + maj Firestore
   void markLessonCompleted(String lessonId) {
     if (!hasAccess || user == null) return;
 
     final currentProgress = user!.progress[course.id] ??
-        Progress(percent: 0, lastLessonId: '', updatedAt: DateTime.now());
+        Progress(
+            percent: 0, lastLessonId: '', updatedAt: DateTime.now(), completedLessonIds: []);
 
-    // Récupérer les leçons complétées
     final completedSet = Set<String>.from(currentProgress.completedLessonIds);
     completedSet.add(lessonId);
 
@@ -76,19 +77,13 @@ class CourseDetailViewModel extends ChangeNotifier {
       completedLessonIds: completedSet.toList(),
     );
 
-    // Met à jour localement et dans Firestore
+    ///  Mise à jour locale
     user!.progress[course.id] = updatedProgress;
     progressValue = newPercent;
 
-    updateProgressInFirestore(course.id, updatedProgress);
-    notifyListeners();
-  }
+    /// Mise à jour Firestore via UserService
+    _userService.updateCourseProgress(user!.id, course.id, updatedProgress);
 
-  /// Persiste le progrès dans Firestore
-  Future<void> updateProgressInFirestore(String courseId, Progress progress) async {
-    if (user == null) return;
-    await _db.collection('users').doc(user!.id).update({
-      'progress.$courseId': progress.toMap(),
-    });
+    notifyListeners();
   }
 }

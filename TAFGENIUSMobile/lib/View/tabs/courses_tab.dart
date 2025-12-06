@@ -110,7 +110,7 @@ class CoursesTab extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(course.icon, style: const TextStyle(fontSize: 30)),
+                Text(course.icons, style: const TextStyle(fontSize: 30)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(

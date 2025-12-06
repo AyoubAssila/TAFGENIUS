@@ -38,14 +38,13 @@ class _EtudiantPageState extends State<EtudiantPage> {
     pages = [
       const DashboardPage(),
 
-      // ---------- FIX : MyCoursesPage reçoit les paramètres du widget ----------
       MyCoursesPage(
-        user: widget.user,
-        courses: widget.myCourses,
+        user: widget.user, // plus de 'courses' ici
       ),
 
       HistoryView(userId: widget.user.id),
     ];
+
   }
 
   void _openDrawer() {

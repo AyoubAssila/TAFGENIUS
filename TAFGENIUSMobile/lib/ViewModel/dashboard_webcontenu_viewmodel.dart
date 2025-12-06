@@ -175,7 +175,7 @@ class DashboardViewModel extends ChangeNotifier {
         teacherId: _newCourse['teacherId'] ?? '',
         category: _newCourse['category'] ?? '',
         price: (_newCourse['price'] ?? 0.0).toDouble(),
-        icon: _newCourse['icon'] ?? '',
+        icons: _newCourse['icons'] ?? '',
         createdAt: now,
         updatedAt: now,
         modulesCount: 0,

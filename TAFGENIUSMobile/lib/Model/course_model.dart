@@ -8,7 +8,7 @@ class CourseModel {
   String teacherId;
   String category;
   double price;
-  String icon; // nouveau champ
+  String icons;
   DateTime createdAt;
   DateTime updatedAt;
   int modulesCount;
@@ -21,7 +21,7 @@ class CourseModel {
     required this.teacherId,
     required this.category,
     required this.price,
-    this.icon = '', // valeur par défaut
+    this.icons = '',
     DateTime? createdAt,
     DateTime? updatedAt,
     this.modulesCount = 0,
@@ -37,10 +37,11 @@ class CourseModel {
       "teacherId": teacherId,
       "category": category,
       "price": price,
-      "icon": icon, // ajout dans le map
+      "icons": icons,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
       "modulesCount": modulesCount,
+      "lessons": lessons.map((l) => l.toMap()).toList(),
     };
   }
 
@@ -52,10 +53,17 @@ class CourseModel {
       teacherId: map['teacherId'] ?? '',
       category: map['category'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
-      icon: map['icon'] ?? '', // récupération du champ icon
+      icons: map['icons'] ?? '', // correction du champ
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       modulesCount: map['modulesCount'] ?? 0,
+      lessons: map['lessons'] != null
+          ? (map['lessons'] as List)
+          .asMap()
+          .entries
+          .map((e) => LessonModel.fromMap(e.value, e.key.toString()))
+          .toList()
+          : [],
     );
   }
 }

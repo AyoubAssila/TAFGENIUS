@@ -8,6 +8,7 @@ import 'ViewModel/dashboard_viewmodel.dart';
 import 'ViewModel/dashboard_viewmodel.dart' as contenu;
 import 'firebase_options.dart';
 import 'package:tafgeniusmobile/Model/user_model.dart';
+
 // Layouts
 import 'package:tafgeniusmobile/View/components/navbar_widget.dart';
 import 'package:tafgeniusmobile/View/components/navbar_accueil_widget.dart';
@@ -18,8 +19,6 @@ import 'package:tafgeniusmobile/View/pages/dashboard_webtechnique.dart' as techn
 import 'package:tafgeniusmobile/View/components/header_webcontenu.dart';
 import 'package:tafgeniusmobile/View/components/sidebar_webcontenu.dart';
 import 'package:tafgeniusmobile/View/components/navbar_webtechnique.dart';
-
-
 
 // Pages publiques
 import 'package:tafgeniusmobile/View/pages/home.dart';
@@ -42,6 +41,7 @@ import 'package:tafgeniusmobile/View/pages/about.dart';
 import 'ViewModel/login_viewmodel.dart';
 import 'ViewModel/signup_viewmodel.dart';
 export '../ViewModel/dashboard_viewmodel.dart';
+import '../ViewModel/courses_viewmodel.dart';
 
 // Pages Admin Technique - ALIAS
 import 'package:tafgeniusmobile/View/pages/user.dart' as technique_users;
@@ -71,11 +71,13 @@ void main() async {
           ChangeNotifierProvider(create: (_) => LoginViewModel()),
           ChangeNotifierProvider(create: (_) => SignupViewModel()),
           ChangeNotifierProvider(create: (_) => DashboardViewModel()),
-          Provider<UserModel>.value(value: userModel), // Fournit l'utilisateur connecté
+          ChangeNotifierProvider(create: (_) => CoursesViewModel()),
+          if (user != null) Provider<UserModel>.value(value: userModel),
         ],
         child: const MyApp(),
       ),
     );
+
   } else {
     // Si pas d'utilisateur connecté, on lance l'application normalement
     runApp(
@@ -113,16 +115,18 @@ class MyApp extends StatelessWidget {
         '/etudiant': (context) => EtudiantLayout(child: DashboardPage()),
         '/dashboard': (context) => EtudiantLayout(child: DashboardPage()),
         '/mycourses': (context) {
-          final user = UserModel(
-            id: 'user123',
-            name: 'John Doe',
-            email: 'john@example.com',
-          );
+          final user = Provider.of<UserModel?>(context);
+
+          if (user == null) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
 
           return EtudiantLayout(
-            child: MyCoursesPage(
-              user: user,
-              courses: const [], // ici tu peux charger les cours depuis Firebase
+            child: ChangeNotifierProvider.value(
+              value: Provider.of<CoursesViewModel>(context),
+              child: MyCoursesPage(user: user),
             ),
           );
         },

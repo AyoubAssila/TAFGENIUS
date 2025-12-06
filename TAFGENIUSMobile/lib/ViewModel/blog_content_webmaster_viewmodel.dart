@@ -9,17 +9,9 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
   final FirebaseAuthService _authService = FirebaseAuthService();
 
   List<PostModel> _allPosts = [];
-  List<PostModel> get experiences => _allPosts.where((p) =>
-  p.category == PostCategory.Experiences
-  ).toList();
-
-  List<PostModel> get articles => _allPosts.where((p) =>
-  p.category == PostCategory.Articles
-  ).toList();
-
-  List<PostModel> get motivations => _allPosts.where((p) =>
-  p.category == PostCategory.Opinions // Utiliser Opinions pour motivation
-  ).toList();
+  List<PostModel> get experiences => _allPosts.where((p) => p.category == PostCategory.Experiences).toList();
+  List<PostModel> get articles => _allPosts.where((p) => p.category == PostCategory.Articles).toList();
+  List<PostModel> get motivations => _allPosts.where((p) => p.category == PostCategory.Motivation).toList();
 
   bool _loading = false;
   bool get loading => _loading;
@@ -29,9 +21,12 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
 
   String? _currentUserId;
   String? _currentUserName;
-  String _selectedTab = 'experiences';
 
-  // Initialiser
+  bool get isVisitor => _currentUserId == null;
+
+  String _selectedTab = 'experiences';
+  String get selectedTab => _selectedTab;
+
   Future<void> initialize() async {
     _loading = true;
     notifyListeners();
@@ -52,7 +47,6 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Charger tous les posts
   Future<void> _loadAllPosts() async {
     try {
       final snapshot = await _firestore
@@ -60,23 +54,43 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
           .orderBy('createdAt', descending: true)
           .get();
 
-      _allPosts = snapshot.docs.map((doc) {
-        return PostModel.fromMap(doc.data(), doc.id);
-      }).toList();
-
+      _allPosts = snapshot.docs.map((doc) => PostModel.fromMap(doc.data(), doc.id)).toList();
       notifyListeners();
     } catch (e) {
       print('Erreur chargement: $e');
     }
   }
 
-  // Ajouter un article ou motivation
-  Future<void> addPost({
-    required String text,
-    required PostCategory category, // Articles ou Opinions (pour motivation)
-    List<AttachmentModel> attachments = const [],
-  }) async {
-    if (_currentUserName == null) return;
+  void showSignupDialog(BuildContext context, String action) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Sign up to $action"),
+        content: const Text("You need to sign up or login to perform this action."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Sign Up / Login"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> addPost(BuildContext context,
+      {required String text,
+        required PostCategory category,
+        List<AttachmentModel> attachments = const []}) async {
+    if (isVisitor) {
+      showSignupDialog(context, "post");
+      return;
+    }
 
     try {
       final newPost = PostModel(
@@ -97,14 +111,12 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
 
       _allPosts.insert(0, newPost);
       notifyListeners();
-
     } catch (e) {
       _errorMessage = 'Erreur création: $e';
       notifyListeners();
     }
   }
 
-  // Modérer une expérience
   Future<void> moderateExperience(String postId, bool approve) async {
     try {
       await _firestore.collection('blogPosts').doc(postId).update({
@@ -112,15 +124,18 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
       });
 
       await _loadAllPosts();
-
     } catch (e) {
       _errorMessage = 'Erreur modération: $e';
       notifyListeners();
     }
   }
 
-  // Supprimer un post
-  Future<void> deletePost(String postId) async {
+  Future<void> deletePost(BuildContext context, String postId) async {
+    if (isVisitor) {
+      showSignupDialog(context, "delete");
+      return;
+    }
+
     try {
       await _firestore.collection('blogPosts').doc(postId).delete();
       _allPosts.removeWhere((p) => p.id == postId);
@@ -131,13 +146,10 @@ class BlogContentWebmasterViewModel extends ChangeNotifier {
     }
   }
 
-  // Changer d'onglet
   void changeTab(String tab) {
     _selectedTab = tab;
     notifyListeners();
   }
-
-  String get selectedTab => _selectedTab;
 
   void clearError() {
     _errorMessage = null;

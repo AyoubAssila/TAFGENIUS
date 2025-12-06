@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../ViewModel/home_viewmodel.dart';
+import 'course_lessons.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -90,7 +91,7 @@ class HomePage extends StatelessWidget {
                           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: const Color(0xFF06112A), ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.search, color: Colors.purple[700], size: 28),
+                          icon: Icon(Icons.search, color:const Color(0xFF06112A), size: 28),
                           onPressed: vm.handleSearchToggle,
                         ),
                       ],
@@ -142,20 +143,39 @@ class HomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(course.icon, style: const TextStyle(fontSize: 40)),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  course.icons,
+                                  height: 120,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+
                               const SizedBox(height: 15),
                               Text(course.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
                               const SizedBox(height: 12),
-                              Text("${course.lessons} lessons", style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-                              const SizedBox(height: 15),
                               Text(
                                 "${course.price.toStringAsFixed(2)} TND",
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.purple[700],
+                                  color: const Color(0xFF06112A),
                                 ),
                               ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CourseLessonsPage(course: course),
+                                    ),
+                                  );
+                                },
+                                child: const Text("See Lessons"),
+                              ),
+
                               const SizedBox(height: 20),
                               SizedBox(
                                 width: double.infinity,
@@ -164,7 +184,7 @@ class HomePage extends StatelessWidget {
                                     Navigator.pushNamed(context, '/login');
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.purple[700],
+                                    backgroundColor: const Color(0xFF06112A),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                     padding: const EdgeInsets.symmetric(vertical: 12),
                                   ),
